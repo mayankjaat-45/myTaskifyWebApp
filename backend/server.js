@@ -1,36 +1,33 @@
+// server.js
 import express from "express";
 import dotenv from "dotenv";
 import connectDb from "./config/db.js";
 import userRouter from "./router/userRouter.js";
+import taskRouter from "./router/taskRouter.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import taskRouter from "./router/taskRouter.js";
+import helmet from "helmet";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
-<<<<<<< HEAD
+app.use(helmet());
 
+// CORS setup
 const corsOptions = {
-  origin: "https://taskify-frontend-xi.vercel.app",
+  origin: process.env.FRONTEND_URL,
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 };
-
 app.use(cors(corsOptions));
-=======
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://taskify-backend-hsac.onrender.com"],
-    credentials: true,
-  })
-);
->>>>>>> 9fbd5930878cee957e19d2599f84a4f0023056b9
 
+// Routes
 app.get("/", (req, res) => {
   res.send("Hello from Server");
 });
@@ -38,8 +35,22 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRouter);
 app.use("/api/tasks", taskRouter);
 
-connectDb().then(() => {
-  app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
-  });
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res
+    .status(err.status || 500)
+    .json({ message: err.message || "Server Error" });
 });
+
+// Connect DB and start server
+connectDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ DB Connection Failed:", err);
+    process.exit(1);
+  });
