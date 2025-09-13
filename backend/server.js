@@ -12,6 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cookieParser());
+<<<<<<< HEAD
 
 const corsOptions = {
   origin: "https://taskify-frontend-xi.vercel.app",
@@ -21,6 +22,14 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+=======
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://taskify-backend-hsac.onrender.com"],
+    credentials: true,
+  })
+);
+>>>>>>> 9fbd5930878cee957e19d2599f84a4f0023056b9
 
 app.get("/", (req, res) => {
   res.send("Hello from Server");
