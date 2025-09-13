@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://taskify-9f8d.onrender.com"],
+    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
     credentials: true,
   })
 );
