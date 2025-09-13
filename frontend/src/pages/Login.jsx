@@ -1,7 +1,8 @@
-import axios from "axios";
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import API from "../api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
+      const res = await API.post(
         "http://localhost:4000/api/user/login",
         values,
         { withCredentials: true }

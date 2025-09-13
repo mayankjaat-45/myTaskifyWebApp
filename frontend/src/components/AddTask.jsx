@@ -1,6 +1,7 @@
-import axios from "axios";
+
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import API from "../api";
 
 const AddTask = ({ setAddTaskDiv }) => {
   const [values, setValues] = useState({
@@ -18,7 +19,7 @@ const AddTask = ({ setAddTaskDiv }) => {
   const handleAddTask = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
+      const res = await API.post(
         "http://localhost:4000/api/tasks/add",
         values,
         { withCredentials: true }

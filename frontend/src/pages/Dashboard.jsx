@@ -5,8 +5,9 @@ import TitleCard from "../components/TitleCard";
 import YetToStart from "../components/YetToStart";
 import InProgress from "../components/InProgress";
 import Completed from "../components/Completed";
-import axios from "axios";
+
 import EditTask from "../components/EditTask";
+import API from "../api";
 
 const Dashboard = () => {
   const [addTaskDiv, setAddTaskDiv] = useState("hidden");
@@ -23,7 +24,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const res = await axios.get(
+        const res = await API.get(
           "http://localhost:4000/api/user/userDetails",
           {
             withCredentials: true,

@@ -1,15 +1,15 @@
 import React from "react";
 import { IoLogOutOutline } from "react-icons/io5";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 const Header = ({ setAddTaskDiv }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post(
+      const res = await API.post(
         "http://localhost:4000/api/user/logout",
         {},
         { withCredentials: true }

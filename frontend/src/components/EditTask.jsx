@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
+import API from "../api";
 
 const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
   const [values, setValues] = useState({
@@ -14,7 +14,7 @@ const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
   useEffect(() => {
     const fetchTask = async () => {
       try {
-        const res = await axios.get(
+        const res = await API.get(
           `http://localhost:4000/api/tasks/get/${editTaskId}`,
           { withCredentials: true }
         );
@@ -36,7 +36,7 @@ const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
   const handleEditTask = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(
+      const res = await API.put(
         `http://localhost:4000/api/tasks/edit/${editTaskId}`,
         values,
         { withCredentials: true }
@@ -60,7 +60,7 @@ const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
     if (!confirmDelete) return;
 
     try {
-      const res = await axios.delete(
+      const res = await API.delete(
         `http://localhost:4000/api/tasks/delete/${editTaskId}`,
         { withCredentials: true }
       );
