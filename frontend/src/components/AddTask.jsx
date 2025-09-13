@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import API from "../api";
@@ -19,11 +18,9 @@ const AddTask = ({ setAddTaskDiv }) => {
   const handleAddTask = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post(
-        "http://localhost:4000/api/tasks/add",
-        values,
-        { withCredentials: true }
-      );
+      const res = await API.post("/api/tasks/add", values, {
+        withCredentials: true,
+      });
       if (res.status === 200) {
         toast.success(res.data.message);
         setAddTaskDiv("hidden");

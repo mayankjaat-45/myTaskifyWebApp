@@ -14,10 +14,9 @@ const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
   useEffect(() => {
     const fetchTask = async () => {
       try {
-        const res = await API.get(
-          `http://localhost:4000/api/tasks/get/${editTaskId}`,
-          { withCredentials: true }
-        );
+        const res = await API.get(`/api/tasks/get/${editTaskId}`, {
+          withCredentials: true,
+        });
         setValues(res.data.task || res.data);
       } catch (error) {
         console.error(error);
@@ -36,11 +35,9 @@ const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
   const handleEditTask = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.put(
-        `http://localhost:4000/api/tasks/edit/${editTaskId}`,
-        values,
-        { withCredentials: true }
-      );
+      const res = await API.put(`/api/tasks/edit/${editTaskId}`, values, {
+        withCredentials: true,
+      });
       if (res.status === 200) {
         toast.success(res.data.message);
         setEditTaskDiv("hidden");
@@ -60,10 +57,9 @@ const EditTask = ({ setEditTaskDiv, editTaskId, setEditTaskId }) => {
     if (!confirmDelete) return;
 
     try {
-      const res = await API.delete(
-        `http://localhost:4000/api/tasks/delete/${editTaskId}`,
-        { withCredentials: true }
-      );
+      const res = await API.delete(`/api/tasks/delete/${editTaskId}`, {
+        withCredentials: true,
+      });
       if (res.status === 200) {
         toast.success(res.data.message);
         setEditTaskDiv("hidden");

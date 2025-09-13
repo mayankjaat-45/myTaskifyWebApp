@@ -20,11 +20,9 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post(
-        "http://localhost:4000/api/user/register",
-        values,
-        { withCredentials: true }
-      );
+      const res = await API.post("/api/user/register", values, {
+        withCredentials: true,
+      });
       toast.success(res.data.message || "Registered successfully 🎉");
       setValues({ username: "", email: "", password: "" });
 

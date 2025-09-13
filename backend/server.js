@@ -12,12 +12,15 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
-    credentials: true,
-  })
-);
+
+const corsOptions = {
+  origin: "https://taskify-frontend-xi.vercel.app",
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+};
+
+app.use(cors(corsOptions));
 
 app.get("/", (req, res) => {
   res.send("Hello from Server");

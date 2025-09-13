@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,11 +18,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post(
-        "http://localhost:4000/api/user/login",
-        values,
-        { withCredentials: true }
-      );
+      const res = await API.post("/api/user/login", values, {
+        withCredentials: true,
+      });
       toast.success(res.data.message || "Login successfully 🎉");
       setValues({ email: "", password: "" });
       localStorage.setItem("token", res.data.token);

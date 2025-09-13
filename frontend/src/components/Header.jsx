@@ -10,7 +10,7 @@ const Header = ({ setAddTaskDiv }) => {
   const handleLogout = async () => {
     try {
       const res = await API.post(
-        "http://localhost:4000/api/user/logout",
+        "/api/user/logout",
         {},
         { withCredentials: true }
       );

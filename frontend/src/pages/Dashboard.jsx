@@ -24,12 +24,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const res = await API.get(
-          "http://localhost:4000/api/user/userDetails",
-          {
-            withCredentials: true,
-          }
-        );
+        const res = await API.get("/api/user/userDetails", {
+          withCredentials: true,
+        });
         setTasks(res.data.tasks || []);
       } catch (error) {
         console.log(error);
