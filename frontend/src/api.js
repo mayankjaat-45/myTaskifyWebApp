@@ -2,7 +2,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://your-backend-url.com",
+  baseURL: import.meta.env.VITE_API_URL, // gets URL from .env
+  withCredentials: true, // include cookies if your backend uses them
 });
 
 // Add token to all requests automatically
