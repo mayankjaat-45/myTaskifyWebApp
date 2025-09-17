@@ -21,7 +21,8 @@ const EditTask = ({
         const res = await API.get(`/api/tasks/get/${editTaskId}`, {
           withCredentials: true,
         });
-        setValues(res.data.task);
+        console.log(res.data); // ✅ Check what is returned
+        setValues(res.data.task || res.data); // sometimes res.data.task is undefined
       } catch (err) {
         console.error("Failed to fetch task:", err);
       }
