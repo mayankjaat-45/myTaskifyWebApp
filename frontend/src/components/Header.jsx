@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 
-const Header = ({ setAddTaskDiv }) => {
+const Header = ({ setAddTaskDiv, refreshTasks }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -23,6 +23,11 @@ const Header = ({ setAddTaskDiv }) => {
     }
   };
 
+  const handleAddTaskClick = () => {
+    setAddTaskDiv("block");
+    if (refreshTasks) refreshTasks(); // optional: refresh tasks when opening add modal
+  };
+
   return (
     <header className="flex items-center justify-between px-10 py-4 bg-gradient-to-r from-blue-700 to-indigo-700 shadow-md">
       {/* Logo */}
@@ -33,7 +38,7 @@ const Header = ({ setAddTaskDiv }) => {
       {/* Actions */}
       <div className="flex gap-6 items-center">
         <button
-          onClick={() => setAddTaskDiv("block")}
+          onClick={handleAddTaskClick}
           className="bg-white text-blue-700 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition-all duration-300"
         >
           + Add Task

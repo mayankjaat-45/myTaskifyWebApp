@@ -1,5 +1,6 @@
 import Task from "../model/task.js";
 
+// Add Task
 export const addTask = async (req, res) => {
   try {
     const { title, description, priority, status } = req.body;
@@ -8,20 +9,17 @@ export const addTask = async (req, res) => {
     if (!title || !description) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
     if (title.length < 4) {
       return res
         .status(400)
-        .json({ message: "Title must be Atleast 4 characters" });
+        .json({ message: "Title must be at least 4 characters" });
     }
-
     if (description.length < 10) {
       return res
         .status(400)
-        .json({ message: "Description must be Atleast 10 characters" });
+        .json({ message: "Description must be at least 10 characters" });
     }
 
-    //creating Task
     const newTask = new Task({
       title,
       description,
@@ -31,47 +29,65 @@ export const addTask = async (req, res) => {
     });
     await newTask.save();
 
-    //pushing task to the user
     user.tasks.push(newTask._id);
     await user.save();
 
-    res.status(200).json({ message: "Task Added Successfully", task: newTask });
+    res.status(201).json({ message: "Task added successfully", task: newTask });
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Internal Server Error " });
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+// Edit Task
 export const editTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, priority, status } = req.body;
 
-    await Task.findByIdAndUpdate(id, { title, description, priority, status });
-    res.status(200).json({ message: "Task Edit" });
+    const task = await Task.findOneAndUpdate(
+      { _id: id, user: req.user._id }, // ✅ ensure only owner can edit
+      { title, description, priority, status },
+      { new: true }
+    );
+
+    if (!task)
+      return res.status(404).json({ message: "Task not found or not yours" });
+
+    res.status(200).json({ message: "Task updated successfully", task });
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Internal Server Error " });
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+// Get Task
 export const getTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const taskDetails = await Task.findById(id);
+
+    const task = await Task.findOne({ _id: id, user: req.user._id }); // ✅ secure
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    res.status(200).json(task);
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Internal Server Error " });
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+// Delete Task
 export const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    await Task.findByIdAndDelete(id);
-    res.json({ message: "task Deleted" });
+
+    const task = await Task.findOneAndDelete({ _id: id, user: req.user._id }); // ✅ secure
+    if (!task)
+      return res.status(404).json({ message: "Task not found or not yours" });
+
+    res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Internal Server Error " });
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

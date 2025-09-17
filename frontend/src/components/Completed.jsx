@@ -1,22 +1,25 @@
 import React from "react";
 import TaskCard from "./TaskCard";
 
-const Completed = ({ task }) => {
+const Completed = ({ task, onTaskClick }) => {
   if (!task || task.length === 0) {
     return (
       <div className="text-center py-6 text-gray-400 italic border border-dashed border-gray-300 rounded-lg">
-        ✅ No Completed Tasks Yet
+        ✅ No Completed Tasks
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold text-green-700 mb-2">
-        Completed Tasks
-      </h2>
-      {task.map((item, idx) =>
-        item ? <TaskCard key={idx} item={item} /> : null
+      {task.map((item) =>
+        item ? (
+          <TaskCard
+            key={item._id}
+            item={item}
+            onClick={() => onTaskClick(item._id)}
+          />
+        ) : null
       )}
     </div>
   );

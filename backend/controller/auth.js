@@ -1,36 +1,32 @@
 import User from "../model/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { it } from "node:test";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
+// REGISTER
 export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    //validation
     if (!username || !email || !password) {
-      return res.status(400).json({ message: "All Fields are Required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     if (password.length < 6) {
-      res
+      return res
         .status(400)
-        .json({ message: "Password must be atleast 6 characters" });
+        .json({ message: "Password must be at least 6 characters" });
     }
-    //checking user Exist or Not
+
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.status(400).json({ message: "User Already Exists" });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    //hashing the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    //creating user
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
@@ -44,43 +40,36 @@ export const register = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "User Register Successfully",
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      message: "User registered successfully",
+      user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal Server error in Register Controller" });
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Internal server error in Register" });
   }
 };
 
+// LOGIN
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    //validation
     if (!email || !password) {
-      return res.status(400).json({ message: "All fields are Required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    //checking the user Exist or not
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    //checking password is correct or not
-    const ismatch = await bcrypt.compare(password, user.password);
-    if (!ismatch) res.status(400).json({ message: "Invalid Credentials" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
-    //generate token
     const token = generateToken(user._id);
 
-    // Set token in HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -89,32 +78,30 @@ export const login = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "User Login Successfully",
+      message: "User login successful",
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server error in LoggedIn " });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Internal server error in Login" });
   }
 };
 
+// LOGOUT
 export const logout = async (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
-    expires: new Date(0), // set expiration in past
+    expires: new Date(0),
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
   });
-  res.json({ message: "logged Out Successfully" });
+  res.json({ message: "Logged out successfully" });
 };
 
+// USER DETAILS
 export const userDetails = async (req, res) => {
   try {
-    // req.user is already the user object set by middleware
     const getDetails = await User.findById(req.user._id)
       .populate("tasks")
       .select("-password");
@@ -123,28 +110,19 @@ export const userDetails = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const allTask = getDetails.tasks || [];
-    const YetToStart = [];
-    const InProgress = [];
-    const Completed = [];
+    const tasks = getDetails.tasks || [];
+    const groupedTasks = {
+      YetToStart: tasks.filter((t) => t.status === "YetToStart"),
+      InProgress: tasks.filter((t) => t.status === "InProgress"),
+      Completed: tasks.filter((t) => t.status === "Completed"),
+    };
 
-    allTask.forEach((item) => {
-      if (item.status === "YetToStart") {
-        YetToStart.push(item);
-      } else if (item.status === "InProgress") {
-        InProgress.push(item);
-      } else if (item.status === "Completed") {
-        // ✅ match status naming
-        Completed.push(item);
-      }
-    });
-
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-      tasks: { YetToStart, InProgress, Completed },
+      tasks: groupedTasks,
     });
   } catch (error) {
     console.error("Error in userDetails:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };

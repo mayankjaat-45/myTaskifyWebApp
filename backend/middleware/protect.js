@@ -5,11 +5,11 @@ export const protect = async (req, res, next) => {
   try {
     let token;
 
-    // 1️⃣ First check cookie
+    // Check cookie first
     if (req.cookies?.token) {
       token = req.cookies.token;
     }
-    // 2️⃣ Then check Authorization header
+    // Then check Bearer token
     else if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -17,26 +17,34 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    // 3️⃣ If no token found
     if (!token) {
-      return res.status(401).json({ message: "Not authorized, no token" });
+      return res
+        .status(401)
+        .json({ success: false, message: "No token provided" });
     }
 
-    // 4️⃣ Verify token
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 5️⃣ Get user without password
+    // Ensure user still exists
     const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res
         .status(401)
-        .json({ message: "Not authorized, user not found" });
+        .json({ success: false, message: "User not found" });
     }
 
-    req.user = user; // attach user to request
-    next(); // pass control to next middleware
+    req.user = user;
+    next();
   } catch (error) {
     console.error("Auth Error:", error.message);
-    return res.status(401).json({ message: "Not authorized, token invalid" });
+
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(401)
+        .json({ success: false, message: "Token expired, please login again" });
+    }
+
+    return res.status(401).json({ success: false, message: "Invalid token" });
   }
 };

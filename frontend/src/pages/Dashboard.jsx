@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import AddTask from "../components/AddTask";
+import EditTask from "../components/EditTask";
 import TitleCard from "../components/TitleCard";
 import YetToStart from "../components/YetToStart";
 import InProgress from "../components/InProgress";
 import Completed from "../components/Completed";
-
-import EditTask from "../components/EditTask";
-import API from "../api";
+import API from "../api.js";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [addTaskDiv, setAddTaskDiv] = useState("hidden");
   const [editTaskDiv, setEditTaskDiv] = useState("hidden");
   const [editTaskId, setEditTaskId] = useState(null);
@@ -20,20 +21,32 @@ const Dashboard = () => {
     Completed: [],
   });
 
-  // ✅ Fetch tasks once on mount
+  // Fetch tasks on mount
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const res = await API.get("/api/user/userDetails", {
-          withCredentials: true,
-        });
-        setTasks(res.data.tasks || []);
-      } catch (error) {
-        console.log(error);
-      }
-    };
     fetchUserDetails();
   }, []);
+
+  const fetchUserDetails = async () => {
+    try {
+      const res = await API.get("/api/user/userDetails", {
+        withCredentials: true,
+      });
+      setTasks(
+        res.data.tasks || { YetToStart: [], InProgress: [], Completed: [] }
+      );
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        console.log(error);
+      }
+    }
+  };
+
+  const handleTaskClick = (id) => {
+    setEditTaskId(id);
+    setEditTaskDiv("block");
+  };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -48,11 +61,7 @@ const Dashboard = () => {
         <div className="w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-4 hover:shadow-2xl transition-all duration-300">
           <TitleCard title={"🚀 Yet To Start"} />
           <div className="pt-4 space-y-3">
-            <YetToStart
-              task={tasks.YetToStart || []}
-              setEditTaskId={setEditTaskId}
-              setEditTaskDiv={setEditTaskDiv}
-            />
+            <YetToStart task={tasks.YetToStart || []} onTaskClick={handleTaskClick} />
           </div>
         </div>
 
@@ -60,11 +69,7 @@ const Dashboard = () => {
         <div className="w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-4 hover:shadow-2xl transition-all duration-300">
           <TitleCard title={"⚡ In Progress"} />
           <div className="pt-4 space-y-3">
-            <InProgress
-              task={tasks.InProgress || []}
-              setEditTaskId={setEditTaskId}
-              setEditTaskDiv={setEditTaskDiv}
-            />
+            <InProgress task={tasks.InProgress || []} onTaskClick={handleTaskClick} />
           </div>
         </div>
 
@@ -72,11 +77,7 @@ const Dashboard = () => {
         <div className="w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-4 hover:shadow-2xl transition-all duration-300">
           <TitleCard title={"✅ Completed"} />
           <div className="pt-4 space-y-3">
-            <Completed
-              task={tasks.Completed || []}
-              setEditTaskId={setEditTaskId}
-              setEditTaskDiv={setEditTaskDiv}
-            />
+            <Completed task={tasks.Completed || []} onTaskClick={handleTaskClick} />
           </div>
         </div>
       </div>
@@ -86,9 +87,7 @@ const Dashboard = () => {
         <>
           <div className="w-full h-screen fixed top-0 left-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
           <div className="w-full h-screen fixed top-0 left-0 flex items-center justify-center">
-            <div className="animate-fadeInUp">
-              <AddTask setAddTaskDiv={setAddTaskDiv} />
-            </div>
+            <AddTask setAddTaskDiv={setAddTaskDiv} refreshTasks={fetchUserDetails} />
           </div>
         </>
       )}
@@ -98,13 +97,12 @@ const Dashboard = () => {
         <>
           <div className="w-full h-screen fixed top-0 left-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
           <div className="w-full h-screen fixed top-0 left-0 flex items-center justify-center">
-            <div className="animate-fadeInUp">
-              <EditTask
-                editTaskId={editTaskId}
-                setEditTaskDiv={setEditTaskDiv}
-                setEditTaskId={setEditTaskId}
-              />
-            </div>
+            <EditTask
+              editTaskId={editTaskId}
+              setEditTaskDiv={setEditTaskDiv}
+              setEditTaskId={setEditTaskId}
+              refreshTasks={fetchUserDetails}
+            />
           </div>
         </>
       )}

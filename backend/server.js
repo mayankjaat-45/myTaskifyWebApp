@@ -6,7 +6,6 @@ import userRouter from "./router/userRouter.js";
 import taskRouter from "./router/taskRouter.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import helmet from "helmet";
 
 dotenv.config();
 
@@ -16,7 +15,6 @@ const PORT = process.env.PORT || 4000;
 // ✅ Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(helmet());
 
 // CORS setup
 const corsOptions = {
@@ -35,19 +33,11 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRouter);
 app.use("/api/tasks", taskRouter);
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res
-    .status(err.status || 500)
-    .json({ message: err.message || "Server Error" });
-});
-
 // Connect DB and start server
 connectDb()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`✅ Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {

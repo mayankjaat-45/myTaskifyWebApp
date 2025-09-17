@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import API from "../api";
+import API from "../api.js";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,17 +18,22 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/api/user/login", values, {
-        withCredentials: true,
-      });
+      const res = await API.post("/api/user/login", values);
+
       toast.success(res.data.message || "Login successfully 🎉");
       setValues({ email: "", password: "" });
-      localStorage.setItem("token", res.data.token);
+
+      // safer: only store user (token is already in HTTP-only cookie)
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Something went wrong!");
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Something went wrong!"
+      );
     }
   };
 
