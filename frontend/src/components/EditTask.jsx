@@ -14,12 +14,19 @@ const EditTask = ({
     status: "YetToStart",
   });
 
-  // Fetch task details on mount or when editTaskId changes
   useEffect(() => {
     if (!editTaskId) return;
-    API.get(`/api/tasks/get/${editTaskId}`).then((res) => {
-      setValues(res.data.task);
-    });
+    const fetchTask = async () => {
+      try {
+        const res = await API.get(`/api/tasks/get/${editTaskId}`, {
+          withCredentials: true,
+        });
+        setValues(res.data.task);
+      } catch (err) {
+        console.error("Failed to fetch task:", err);
+      }
+    };
+    fetchTask();
   }, [editTaskId]);
 
   const handleChange = (e) => {
@@ -29,22 +36,29 @@ const EditTask = ({
 
   const handleEditTask = async (e) => {
     e.preventDefault();
-    await API.put(`/api/tasks/edit/${editTaskId}`, values, {
-      withCredentials: true,
-    });
-    setEditTaskDiv("hidden");
-    setEditTaskId(null);
-    fetchTasks();
+    try {
+      await API.put(`/api/tasks/edit/${editTaskId}`, values, {
+        withCredentials: true,
+      });
+      setEditTaskDiv("hidden");
+      setEditTaskId(null);
+      fetchTasks();
+    } catch (err) {
+      console.error("Failed to update task:", err);
+    }
   };
 
   const handleDeleteTask = async () => {
-    if (window.confirm("Delete this task?")) {
+    if (!window.confirm("Delete this task?")) return;
+    try {
       await API.delete(`/api/tasks/delete/${editTaskId}`, {
         withCredentials: true,
       });
       setEditTaskDiv("hidden");
       setEditTaskId(null);
       fetchTasks();
+    } catch (err) {
+      console.error("Failed to delete task:", err);
     }
   };
 
@@ -54,7 +68,6 @@ const EditTask = ({
         ✏️ Edit Task
       </h2>
       <form className="flex flex-col gap-4" onSubmit={handleEditTask}>
-        {/* Title */}
         <input
           type="text"
           name="title"
@@ -64,51 +77,35 @@ const EditTask = ({
           placeholder="Task Title..."
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         />
-
-        {/* Priority & Status */}
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label className="block mb-1 font-medium text-gray-700">
-              Priority
-            </label>
-            <select
-              name="priority"
-              value={values.priority}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-            >
-              <option value="Low">🟢 Low</option>
-              <option value="Medium">🟡 Medium</option>
-              <option value="High">🔴 High</option>
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="block mb-1 font-medium text-gray-700">
-              Status
-            </label>
-            <select
-              name="status"
-              value={values.status}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-            >
-              <option value="YetToStart">🚀 Yet To Start</option>
-              <option value="InProgress">⚡ In Progress</option>
-              <option value="Completed">✅ Completed</option>
-            </select>
-          </div>
+          <select
+            name="priority"
+            value={values.priority}
+            onChange={handleChange}
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          >
+            <option value="Low">🟢 Low</option>
+            <option value="Medium">🟡 Medium</option>
+            <option value="High">🔴 High</option>
+          </select>
+          <select
+            name="status"
+            value={values.status}
+            onChange={handleChange}
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          >
+            <option value="YetToStart">🚀 Yet To Start</option>
+            <option value="InProgress">⚡ In Progress</option>
+            <option value="Completed">✅ Completed</option>
+          </select>
         </div>
-
-        {/* Description */}
         <textarea
           name="description"
           value={values.description}
           onChange={handleChange}
           placeholder="Task Description..."
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition h-[12vh] resize-none"
-        ></textarea>
-
-        {/* Buttons */}
+        />
         <div className="flex flex-col md:flex-row gap-4 mt-2">
           <button
             type="submit"

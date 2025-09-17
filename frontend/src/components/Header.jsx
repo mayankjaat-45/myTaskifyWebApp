@@ -1,55 +1,29 @@
 import React from "react";
-import { IoLogOutOutline } from "react-icons/io5";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import API from "../api";
 
-const Header = ({ setAddTaskDiv, refreshTasks }) => {
+const Header = ({ setAddTaskDiv }) => {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      const res = await API.post(
-        "/api/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      toast.success(res.data?.message);
-      localStorage.removeItem("token");
-      navigate("/login");
-    } catch (error) {
-      console.log(error);
-      toast.error("Logout failed!");
-    }
-  };
-
-  const handleAddTaskClick = () => {
-    setAddTaskDiv("block");
-    if (refreshTasks) refreshTasks(); // optional: refresh tasks when opening add modal
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   return (
-    <header className="flex items-center justify-between px-10 py-4 bg-gradient-to-r from-blue-700 to-indigo-700 shadow-md">
-      {/* Logo */}
-      <h1 className="text-2xl font-bold text-white tracking-wide cursor-pointer">
-        Taskify
-      </h1>
-
-      {/* Actions */}
-      <div className="flex gap-6 items-center">
+    <header className="w-full flex justify-between items-center p-4 md:px-8 bg-white shadow-md sticky top-0 z-50">
+      <h1 className="text-2xl font-bold text-blue-800">Taskify</h1>
+      <div className="flex gap-3">
         <button
-          onClick={handleAddTaskClick}
-          className="bg-white text-blue-700 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition-all duration-300"
+          onClick={() => setAddTaskDiv("block")}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition flex items-center gap-1"
         >
-          + Add Task
+          ➕ Add Task
         </button>
-
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1 text-white text-lg hover:text-red-400 transition-all duration-300"
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition"
         >
-          <IoLogOutOutline size={22} />
-          <span className="hidden sm:inline font-medium">Logout</span>
+          Logout
         </button>
       </div>
     </header>
