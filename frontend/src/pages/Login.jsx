@@ -10,7 +10,7 @@ const Login = () => {
     password: "",
   });
 
-  const HandleInput = (e) => {
+  const onChangeHandle = (e) => {
     const { name, value } = e.target;
     setValues({ ...values, [name]: value });
   };
@@ -18,69 +18,59 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/api/user/login", values);
+      const res = await API.post("/api/user/login", values, {
+        withCredentials: true,
+      });
 
-      toast.success(res.data.message || "Login successfully 🎉");
-      setValues({ email: "", password: "" });
+      // Save JWT token
+      localStorage.setItem("token", res.data.token);
 
-      // safer: only store user (token is already in HTTP-only cookie)
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-
+      toast.success(res.data.message || "Logged in successfully 🎉");
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Something went wrong!"
+        error.response?.data?.message || error.message || "Login failed!"
       );
     }
   };
 
   return (
-    <div className="flex h-screen justify-center items-center bg-gradient-to-r from-blue-600 to-indigo-700">
-      <div className="w-[90%] md:w-[60%] lg:w-[28%] bg-white rounded-2xl shadow-xl p-8">
-        {/* Logo */}
-        <h1 className="text-4xl font-bold text-center text-blue-700 mb-2">
+    <div className="flex h-screen justify-center items-center bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="bg-white shadow-lg rounded-xl p-8 w-[90vw] md:w-[50vw] lg:w-[30vw]">
+        <h1 className="text-4xl font-bold text-center text-blue-800 mb-2">
           Taskify
         </h1>
-        <h3 className="text-center font-medium text-gray-600 mb-6">
-          Login to continue managing your tasks 🚀
+        <h3 className="text-center text-gray-600 mb-6">
+          Login to your account 🚀
         </h3>
 
-        {/* Form */}
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
               type="email"
               name="email"
               value={values.email}
-              onChange={HandleInput}
-              className="border rounded-lg px-4 py-2 w-full outline-none focus:ring-2 focus:ring-blue-600 transition-all duration-300"
+              onChange={onChangeHandle}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               placeholder="Enter your email"
               required
             />
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Password
             </label>
             <input
               type="password"
               name="password"
               value={values.password}
-              onChange={HandleInput}
-              className="border rounded-lg px-4 py-2 w-full outline-none focus:ring-2 focus:ring-blue-600 transition-all duration-300"
+              onChange={onChangeHandle}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               placeholder="Enter your password"
               required
             />
@@ -88,24 +78,21 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg shadow-md transition-all duration-300"
+            className="mt-4 bg-blue-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-900 transition-all duration-200"
           >
             Login
           </button>
-        </form>
 
-        {/* Footer */}
-        <div className="text-center mt-6 text-gray-700">
-          <p>
+          <p className="text-center text-gray-600 text-sm mt-3">
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-blue-700 font-semibold hover:underline"
+              className="text-blue-800 font-medium hover:underline"
             >
               Register
             </Link>
           </p>
-        </div>
+        </form>
       </div>
     </div>
   );

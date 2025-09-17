@@ -20,10 +20,18 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/api/user/register", values);
+      const res = await API.post("/api/user/register", values, {
+        withCredentials: true, // if backend sets httpOnly cookie
+      });
 
       toast.success(res.data.message || "Registered successfully 🎉");
+
       setValues({ username: "", email: "", password: "" });
+
+      // Save token if backend returns it
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
